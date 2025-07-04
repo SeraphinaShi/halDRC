@@ -1,3 +1,5 @@
+## Data Download
+
 ---
 title: "Dose-Response Estimation with HAL: Simulated and Real Data"
 author: "Seraphina Shi"
