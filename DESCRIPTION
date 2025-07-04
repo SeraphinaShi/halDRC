@@ -1,0 +1,22 @@
+Package: halDRC
+Title: HAL-based Plugin Estimation of the Causal Dose-Response Curve
+Version: 0.1.0
+Authors@R: 
+    person("Junming", "Shi", email = "junming_shi@berkeley.edu", role = c("aut", "cre"))
+Description: This package implements the plugin estimator for causal dose-response curves using Highly Adaptive Lasso (HAL), as described in Shi et al. (2024). It supports data-adaptive HAL fitting, undersmoothing, and delta-method based inference via influence curve calculations.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    dplyr,
+    hal9001,
+    glmnet,
+    sl3,
+    stats,
+    data.table
+RoxygenNote: 7.3.2
+URL: https://arxiv.org/abs/2406.05607
+BugReports: https://github.com/yourusername/halDRC/issues
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
