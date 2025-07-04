@@ -92,7 +92,7 @@ browseVignettes("halDRC")
 # Then click 'halDRC-demo' to view the full analysis
 ```
 
-Or view the [online vignette here](https://github.com/SeraphinaShi/halDRC/blob/main/doc/halDRC-demo.html).
+Or view the [online vignette here](https://github.com/SeraphinaShi/halDRC/blob/master/doc/halDRC-demo.html).
 
 This vignette demonstrates the full analysis pipeline using real data:
 - Loading and preprocessing the RHC dataset
