@@ -18,5 +18,8 @@ RoxygenNote: 7.3.2
 URL: https://arxiv.org/abs/2406.05607
 BugReports: https://github.com/yourusername/halDRC/issues
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+VignetteBuilder: knitr
