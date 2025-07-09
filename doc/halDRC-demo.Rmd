@@ -1,3 +1,5 @@
+## Data Download
+
 ---
 title: "Dose-Response Estimation with HAL: Simulated and Real Data"
 author: "Seraphina Shi"
@@ -183,86 +185,101 @@ ggplot(df_ests, aes(x = a, y = y_hat)) +
 
 ---
 
-# 3. Real Data Example: RHC Study
+# 3. Real Data Illustration: Right Heart Catheterization (RHC) Study
 
-We now apply the HAL-based dose-response estimation procedure to real observational data from the **Right Heart Catheterization (RHC)** study. This data set includes detailed clinical variables and treatments administered to critically ill patients. 
+In this section, we demonstrate the use of HAL-based marginal dose-response estimation on observational data from the RHC study. This dataset contains detailed clinical information on critically ill patients. We investigate the causal effect of age on two outcomes: in-hospital mortality and length of hospital stay, adjusting for demographic and clinical covariates such as sex and severity of illness.
 
-Our goal is to estimate the marginal causal effect of treatment intensity (here proxied by a synthetic "ProcedureCount" variable) on hospital length of stay, adjusting for baseline severity and biomarkers.
-
-
-## 3.1 Load and Prepare RHC Data
-
-In this section, we load the raw RHC dataset, construct the outcome variable (length of hospital stay), define the treatment (number of procedures), and select relevant clinical confounders. We also perform data cleaning and variable formatting to prepare the dataset for analysis.
-
+## 3.1 Common Setup
+We begin by loading the dataset, processing variables, and defining a reusable function for fitting and visualizing dose-response curves.
 
 ```{r get_real_data}
-# Load raw dataset
+# Load packages
+library(dplyr)
+library(ggplot2)
+library(halDRC)
+
+# Load RHC dataset
 ObsData <- read.csv("https://hbiostat.org/data/repo/rhc.csv", header = TRUE)
 
-# Create outcome Y: length of stay
-ObsData$Y <- ObsData$dschdte - ObsData$sadmdte
-ObsData$Y[is.na(ObsData$Y)] <- ObsData$dthdte[is.na(ObsData$Y)] - ObsData$sadmdte[is.na(ObsData$Y)]
+# Clean outcome: length of stay (Y)
+ObsData$Y_los <- ObsData$dschdte - ObsData$sadmdte
+ObsData$Y_los[is.na(ObsData$Y_los)] <- ObsData$dthdte[is.na(ObsData$Y_los)] - ObsData$sadmdte[is.na(ObsData$Y_los)]
 
-# Add synthetic ProcedureCount (used as A)
-set.seed(145)
-ObsData$ProcedureCount <- round(runif(nrow(ObsData), min = 0, max = 10), 0)
+# Clean outcome: in-hospital death (binary)
+ObsData$Y_death <- as.integer(ObsData$dthdte == ObsData$dschdte)
+ObsData$Y_death[is.na(ObsData$Y_death)] <- 0
 
-# Rename variables needed for analysis
+# Rename common confounders
 ObsData <- ObsData %>%
-  dplyr::rename(
+  rename(
     APACHE.score = aps1,
     DASIndex = das2d3pc,
     Creatinine = crea1,
     Bilirubin = bili1,
     WBC = wblc1,
     Heart.rate = hrt1
+  ) %>%
+  mutate(
+    sex_m = ifelse(sex == 'Male', 1, 0),
+    ProcedureCount = round(runif(n(), min = 0, max = 10))
   )
 
-# Subset to required columns for analysis
-analysis_df <- ObsData %>%
-  dplyr::select(
-    Y,
-    A = ProcedureCount,
-    APACHE.score,
-    DASIndex,
-    Creatinine,
-    Bilirubin,
-    WBC,
-    Heart.rate
+
+# ℹ️ For computational efficiency in this demo, we randomly selected 500 observations from the full cleaned dataset for this HAL analysis.
+set.seed(2025)
+ObsData <- ObsData %>% sample_n(500)
+```
+
+## 3.2 Causal Relationship 1: Effect of Age on Length of Stay
+We treat age as the exposure of interest and estimate its causal effect on  hospital length of stay, controlling for baseline severity and other confounders.
+
+```{r halDRC_realdata_1}
+drc_data1 <- ObsData %>%
+  select(
+    Y = Y_los,
+    A = age,
+    sex_m, APACHE.score, DASIndex, Creatinine, Bilirubin, WBC, Heart.rate, Y_death
   ) %>%
   na.omit()
 
-# ℹ️ For computational efficiency in this demo, we randomly selected 1,000 observations from the full cleaned dataset for this HAL analysis.
-set.seed(2025)
-analysis_df <- analysis_df %>% sample_n(1000)
+drc_fit1 <- fit_UHAL_DRC(dat = drc_data1, y_var_name = "Y", trt_var_name = "A", family = "gaussian")
+drc_est1 <- drc_fit1$curve_est
 
-head(analysis_df)
-```
-
-## 3.2 Fit and Plot HAL Dose-Response Curve
-
-Here, we apply the `fit_UHAL_DRC()` function to the real data and visualize the estimated marginal dose-response curve. This helps assess how treatment intensity is associated with patient outcomes after adjusting for confounding.
-
-
-```{r halDRC_realdata}
-DRC_fit_UAdaptive <- fit_UHAL_DRC(dat = analysis_df, y_var_name = "Y", trt_var_name = "A", family = "gaussian")
-df_ests <- DRC_fit_UAdaptive$curve_est
-
-head(df_ests)
-
-ggplot(df_ests, aes(x = a, y = y_hat)) +
+ggplot(drc_est1, aes(x = a, y = y_hat)) +
   geom_line() +
   geom_point() +
   geom_ribbon(aes(ymin = ci_lwr, ymax = ci_upr), alpha = 0.3) +
-  labs(
-    title = "Estimated Marginal Dose-Response Curve",
-    x = "Number of Procedures (A)",
-    y = "Expected Length of Stay (Y)"
-  ) +
+  labs(title = "Dose-Response: Age vs Length of Stay", 
+       x = "Age (A)", 
+       y = "Expected Length of Stay (Y)") +
   theme_bw()
 ```
 
----
+## 3.2 Causal Relationship 2: Effect of Age on In-Hospital Mortality
+Here, we again consider age as the treatment variable but now estimate its effect on the probability of in-hospital death, while adjusting for mortality and clinical severity indicators.
+
+```{r halDRC_realdata_2}
+drc_data2 <- ObsData %>%
+  select(
+    Y = Y_death,
+    A = age,
+    sex_m, APACHE.score, DASIndex, Creatinine, Bilirubin, WBC, Heart.rate, Y_los
+  ) %>%
+  na.omit()
+
+drc_fit2 <- fit_UHAL_DRC(dat = drc_data2, y_var_name = "Y", trt_var_name = "A", family = "binomial")
+drc_est2 <- drc_fit2$curve_est
+
+ggplot(drc_est2, aes(x = a, y = y_hat)) +
+  geom_line() +
+  geom_point() +
+  geom_ribbon(aes(ymin = ci_lwr, ymax = ci_upr), alpha = 0.3) +
+  labs(title = "Dose-Response: Age vs In-Hospital Mortality", 
+       x = "Age (A)", 
+         y = "Expected In-Hospital Death (Y)") +
+  theme_bw()
+```
+
 
 # 4. Summary
 
