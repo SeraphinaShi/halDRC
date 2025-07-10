@@ -86,14 +86,14 @@ We provide a comprehensive walkthrough of the 'halDRC' package using both simula
 
 View the [online here](https://seraphinashi.github.io/halDRC/halDRC-demo.html).
 
-**Simulated Data Example**
+**Simulated Data Example**  
 We demonstrate the entire analysis pipeline on simulated data, including:
 - Generating synthetic datasets with binary or continuous outcomes
 - Fitting the HAL plugin estimator to model the dose-response relationship
 - Visualizing the estimated dose-response curve
 - Comparing to the known ground-truth curve, enabling direct performance assessment
 
-**Real-World Data Example: RHC Dataset**
+**Real-World Data Example: RHC Dataset**  
 We also apply the pipeline to real-world observational data from the RHC study:
 - Loading and preprocessing the RHC dataset
 - Choosing treatment and confounder variables
