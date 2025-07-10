@@ -80,25 +80,25 @@ ggplot(fit$curve_est, aes(x = a, y = y_hat)) +
 
 ---
 
-## 📘 Vignette Example: Real RHC Dataset
+## 📘 More Examples: Simulation Datasets + Real RHC Dataset
 
-We provide a full demo using the RHC (Right Heart Catheterization) dataset from the TMLE workshop.
+We provide a comprehensive walkthrough of the 'halDRC' package using both simulated datasets and the Right Heart Catheterization (RHC) dataset from the TMLE workshop.
 
-### 🔍 View the Vignette
+View the [online here](https://seraphinashi.github.io/halDRC/halDRC-demo.html).
 
-```r
-# After installation
-browseVignettes("halDRC")
-# Then click 'halDRC-demo' to view the full analysis
-```
+**Simulated Data Example**
+We demonstrate the entire analysis pipeline on simulated data, including:
+- Generating synthetic datasets with binary or continuous outcomes
+- Fitting the HAL plugin estimator to model the dose-response relationship
+- Visualizing the estimated dose-response curve
+- Comparing to the known ground-truth curve, enabling direct performance assessment
 
-Or view the [online vignette here](http://127.0.0.1:10508/library/halDRC/doc/halDRC-demo.html).
-
-This vignette demonstrates the full analysis pipeline using real data:
+**Real-World Data Example: RHC Dataset**
+We also apply the pipeline to real-world observational data from the RHC study:
 - Loading and preprocessing the RHC dataset
 - Choosing treatment and confounder variables
 - Fitting the HAL plugin estimator
-- Visualizing the estimated dose-response curve
+- Visualizing the estimated dose-response curve to explore potential causal effects
 
 ---
 
