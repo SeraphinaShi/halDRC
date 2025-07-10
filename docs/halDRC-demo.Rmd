@@ -226,8 +226,8 @@ ObsData <- ObsData %>%
 
 
 # ℹ️ For computational efficiency in this demo, we randomly selected 500 observations from the full cleaned dataset for this HAL analysis.
-set.seed(2025)
-ObsData <- ObsData %>% sample_n(500)
+# set.seed(2025)
+# ObsData <- ObsData %>% sample_n(500)
 ```
 
 ## 3.2 Causal Relationship 1: Effect of Age on Length of Stay
